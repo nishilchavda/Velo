@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import MovementsFeed from "../Components/ui/MovementsFeed";
@@ -19,6 +19,7 @@ const Movement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMovement, setSelectedMovement] = useState(null);
   const [requestingId, setRequestingId] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleEdit = (movement) => {
     setSelectedMovement(movement);
@@ -30,27 +31,47 @@ const Movement = () => {
     setSelectedMovement(null);
   };
 
-  const fetchMovements = useCallback(async () => {
+  const triggerRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleDelete = async (movementId) => {
+    if (!window.confirm("Are you sure you want to delete this movement?"))
+      return;
+
     try {
-      setLoading(true);
-      const endpoint = view === "mine" ? "/movement/all" : "/movement/global";
-      const response = await api.get(endpoint);
-      setMovements(view === "mine" ? (response.data.mov || []) : (response.data.movs || []));
+      await api.delete(`/movement/delete/${movementId}`);
+      toast.success("Movement deleted successfully!");
+      triggerRefresh();
     } catch (err) {
-      console.error("Error fetching movements:", err);
-      if (err.response?.status === 401 && view === "mine") {
-        navigate("/login-signup");
-        return;
-      }
-      toast.error(`Failed to load ${view} movements.`);
-    } finally {
-      setLoading(false);
+      console.error("Error deleting movement:", err);
+      toast.error(err.response?.data?.error || "Failed to delete movement");
     }
-  }, [navigate, view]);
+  };
 
   useEffect(() => {
+    const fetchMovements = async () => {
+      try {
+        setLoading(true);
+        const endpoint = view === "mine" ? "/movement/all" : "/movement/global";
+        const response = await api.get(endpoint);
+        setMovements(
+          view === "mine" ? response.data.mov || [] : response.data.movs || [],
+        );
+      } catch (err) {
+        console.error("Error fetching movements:", err);
+        if (err.response?.status === 401 && view === "mine") {
+          navigate("/login-signup");
+          return;
+        }
+        toast.error(`Failed to load ${view} movements.`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchMovements();
-  }, [fetchMovements]);
+  }, [view, navigate, refreshTrigger]);
 
   const handleJoinRequest = async (movementId, receiverId) => {
     if (!user) {
@@ -70,38 +91,44 @@ const Movement = () => {
 
   const filteredMovements = movements.filter((mov) => {
     const destName = mov.destination?.name?.toLowerCase() || "";
-    const tags = mov.vibeTags?.map(t => t.toLowerCase()) || [];
+    const tags = mov.vibeTags?.map((t) => t.toLowerCase()) || [];
     const query = searchQuery.toLowerCase();
-    return destName.includes(query) || tags.some(tag => tag.includes(query));
+    return destName.includes(query) || tags.some((tag) => tag.includes(query));
   });
 
   return (
     <div className="min-h-screen bg-white pt-20 md:pt-12 pb-20 px-4 md:px-10 font-sans">
       <div className="container mx-auto max-w-7xl">
         {/* Page Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-6 md:mb-12">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-6xl font-display font-black text-gray-900 tracking-tight leading-none mb-6">
               {view === "mine" ? (
-                <>Your active <span className="text-gradient">movements.</span></>
+                <>
+                  Your active <span className="text-gradient">movements.</span>
+                </>
               ) : (
-                <>Discover your <span className="text-gradient">next sync.</span></>
+                <>
+                  Discover{" "}
+                  <span className="text-gradient">Movements.</span>
+                </>
               )}
             </h1>
             <p className="text-sm md:text-lg text-gray-500 font-medium leading-relaxed">
-              {view === "mine" 
+              {view === "mine"
                 ? "Track your upcoming trips, coordinate with buddies, and manage your travel schedule in one place."
-                : "Explore active movements, Connect with travelers heading your way and start your journey."
-              }
+                : "Explore active movements, Connect with travelers heading your way and start your journey."}
             </p>
           </div>
 
-          <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-row items-center justify-between gap-2">
             <div className="bg-gray-100 p-1 rounded-2xl flex items-center relative">
               <button
                 onClick={() => setView("explore")}
                 className={`relative z-10 flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl text-sm font-black transition-colors ${
-                  view === "explore" ? "text-gray-900" : "text-gray-400 hover:text-gray-500"
+                  view === "explore"
+                    ? "text-gray-900"
+                    : "text-gray-400 hover:text-gray-500"
                 }`}
               >
                 <Compass size={18} />
@@ -123,7 +150,9 @@ const Movement = () => {
                   setView("mine");
                 }}
                 className={`relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black transition-colors ${
-                  view === "mine" ? "text-gray-900" : "text-gray-400 hover:text-gray-500"
+                  view === "mine"
+                    ? "text-gray-900"
+                    : "text-gray-400 hover:text-gray-500"
                 }`}
               >
                 <Route size={18} />
@@ -138,8 +167,7 @@ const Movement = () => {
               </button>
             </div>
 
-
-            <button 
+            <button
               onClick={() => {
                 if (!user) {
                   navigate("/login-signup");
@@ -151,13 +179,13 @@ const Movement = () => {
               className="flex items-center gap-2 px-4 md:px-8 py-3.5 bg-black text-white rounded-2xl font-black hover:bg-brand transition-all active:scale-95 shadow-xl shadow-black/10"
             >
               <Plus size={20} />
-              Movement
+              <span className="hidden md:block">Movement</span>
             </button>
           </div>
         </div>
 
         {/* Search Bar (Only for Explore or always visible?) */}
-        <div className="flex flex-col md:flex-row gap-4 mb-12">
+        <div className="flex flex-row gap-4">
           <div className="relative flex-1 group">
             <Search
               className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand transition-colors"
@@ -173,7 +201,7 @@ const Movement = () => {
           </div>
           <button className="flex items-center gap-2 px-6 py-4 bg-white border border-gray-100 text-gray-900 rounded-2xl font-black hover:border-black transition-all active:scale-95 shadow-sm">
             <Filter size={18} />
-            <span>Filters</span>
+            <span className="hidden md:block">Filters</span>
           </button>
         </div>
 
@@ -186,22 +214,22 @@ const Movement = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            <MovementsFeed 
-              movements={filteredMovements} 
-              loading={loading} 
-              onEdit={handleEdit} 
+            <MovementsFeed
+              movements={filteredMovements}
+              loading={loading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               onJoin={view === "explore" ? handleJoinRequest : null}
               requestingId={requestingId}
             />
           </motion.div>
         </AnimatePresence>
 
-
         {/* Create Movement Modal */}
-        <CreateMovementModal 
-          isOpen={isModalOpen} 
-          onClose={handleCloseModal} 
-          onCreated={fetchMovements} 
+        <CreateMovementModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onCreated={triggerRefresh}
           initialData={selectedMovement}
         />
       </div>
@@ -210,4 +238,3 @@ const Movement = () => {
 };
 
 export default Movement;
-

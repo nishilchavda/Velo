@@ -333,7 +333,7 @@ const Community = () => {
                   <TrendingUp size={20} />
                 </div>
                 <h3 className="text-xl font-display font-black text-gray-900">
-                  Popular Hubs
+                  Popular Communities
                 </h3>
               </div>
 
@@ -352,10 +352,10 @@ const Community = () => {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-gray-900 truncate group-hover:text-brand transition-colors">
+                      <p className="text-sm font-black text-gray-900 lowercase truncate group-hover:text-brand transition-colors">
                         v/{comm.name}
                       </p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                      <p className="text-[10px] text-gray-400 font-bold capitalize tracking-widest">
                         {comm.members?.length || 0} members
                       </p>
                     </div>

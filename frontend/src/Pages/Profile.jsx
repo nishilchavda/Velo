@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import api from "../api";
@@ -11,6 +11,13 @@ import {
   Activity,
   Search,
   MapPin,
+  Edit2,
+  MessageCircle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  LogOut,
+  Settings,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import PostCard from "../Components/PostCard";
@@ -19,7 +26,12 @@ import CommentSection from "../Components/CommentSection";
 const Profile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser, updateUserProfile } = useContext(AuthContext);
+  const dropdownRef = useRef(null);
+  const {
+    user: currentUser,
+    updateUserProfile,
+    logout,
+  } = useContext(AuthContext);
 
   const isOwnProfile = !userId || userId === currentUser?._id;
   const targetId = isOwnProfile ? currentUser?._id : userId;
@@ -54,22 +66,24 @@ const Profile = () => {
     vibeTags: "",
     interestTags: "",
   });
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!targetId) return;
       try {
-        const [userRes, postsRes, commRes, countRes, buddiesRes] = await Promise.all([
-          api.get(`/user/profile/${targetId}`),
-          api.get(`/community/posts/user/${targetId}`),
-          api.get(
-            isOwnProfile
-              ? "/community/my-communities"
-              : `/community/user-communities/${targetId}`,
-          ),
-          api.get(`/connection/count/${targetId}`),
-          api.get(`/connection/list/${targetId}`),
-        ]);
+        const [userRes, postsRes, commRes, countRes, buddiesRes] =
+          await Promise.all([
+            api.get(`/user/profile/${targetId}`),
+            api.get(`/community/posts/user/${targetId}`),
+            api.get(
+              isOwnProfile
+                ? "/community/my-communities"
+                : `/community/user-communities/${targetId}`,
+            ),
+            api.get(`/connection/count/${targetId}`),
+            api.get(`/connection/list/${targetId}`),
+          ]);
 
         const profileUser = userRes.data.user;
         setTargetUser(profileUser);
@@ -125,6 +139,17 @@ const Profile = () => {
 
     fetchData();
   }, [targetId, isOwnProfile, currentUser, userId]);
+
+  // Reliable Click Outside Handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowSettingsDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLikePost = async (postId) => {
     if (!currentUser) {
@@ -238,14 +263,24 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen font-sans py-10">
+    <div className="min-h-screen font-sans py-16 md:py-10">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-12 gap-8 px-4 md:px-8">
           {/* Middle Column (Content Feed) */}
-          <div className="col-span-12 lg:col-span-8 space-y-6">
+          <div className="col-span-12 lg:col-span-8">
             {/* Header Card */}
-            <div className="p-4 flex flex-col md:flex-row items-center gap-4 relative overflow-hidden bg-white rounded-3xl mb-6">
-              <div className="relative shrink-0 z-20 group">
+            <div className="p-2 flex flex-row justify-center items-center gap-4 relative overflow-hidden bg-white rounded-3xl">
+              <div className="md:hidden w-full h-32 overflow-hidden rounded-xl">
+                <img
+                  src={targetUser.bannerImage}
+                  className="w-full h-full object-cover"
+                  alt={targetUser.username}
+                />
+              </div>
+            </div>
+
+            <div className="p-2 flex flex-row justify-center items-center gap-4 relative bg-white rounded-3xl mb-4 md:mb-6">
+              <div className="relative shrink-0 z-20">
                 <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white">
                   <img
                     src={targetUser.profileImage}
@@ -255,32 +290,67 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="flex-1 text-center md:text-left z-10">
-                <div className="flex flex-col md:flex-row items-center">
+              <div className="flex-1 text-left z-10">
+                <div className="flex flex-row items-center">
                   <h1 className="text-2xl font-display font-bold">
                     {targetUser.fullname}
                   </h1>
                 </div>
-                <p className="text-sm font-bold lowercase">{targetUser.username}</p>
+                <p className="text-sm font-bold lowercase">
+                  @{targetUser.username}
+                </p>
               </div>
 
-              <div className="flex gap-3 z-10">
+              <div className="flex flex-col md:flex-row gap-2 z-30">
                 {isOwnProfile ? (
-                  <>
+                  <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => setShowEditModal(true)}
-                      className="px-8 py-3.5 bg-black text-white hover:bg-brand rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
+                      onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                      className="p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl text-gray-400 hover:text-gray-900 transition-all active:scale-95 border border-gray-100"
                     >
-                      Edit Profile
+                      <Settings size={20} />
                     </button>
-                  </>
+
+                    <AnimatePresence>
+                      {showSettingsDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                          className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden"
+                        >
+                          <button
+                            onClick={() => {
+                              setShowEditModal(true);
+                              setShowSettingsDropdown(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-6 py-4 text-[10px] font-black text-gray-700 hover:bg-gray-50 transition-all text-left uppercase tracking-widest"
+                          >
+                            <Edit2 size={16} className="text-blue-500" />
+                            Edit Profile
+                          </button>
+                          <button
+                            onClick={() => {
+                              logout();
+                              navigate("/login-signup");
+                            }}
+                            className="w-full flex items-center gap-3 px-6 py-4 text-[10px] font-black text-red-600 hover:bg-red-50 transition-all text-left border-t border-gray-50 uppercase tracking-widest"
+                          >
+                            <LogOut size={16} />
+                            Logout
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 ) : connectionStatus === "accepted" ? (
                   <>
                     <button
                       onClick={() => navigate("/chat")}
-                      className="px-8 py-3.5 bg-black text-white hover:bg-brand rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-black/10 active:scale-95"
+                      className="px-4 py-3.5 bg-black text-white hover:bg-brand rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-black/10 active:scale-95"
                     >
-                      Message
+                      <MessageCircle size={18} className="block md:hidden" />
+                      <span className="hidden md:block">Message</span>
                     </button>
                   </>
                 ) : connectionStatus === "pending" ? (
@@ -288,20 +358,23 @@ const Profile = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleUpdateStatus("accepted")}
-                        className="px-8 py-3.5 bg-brand text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-brand/20 active:scale-95 transition-all"
+                        className="px-4 py-3.5 bg-brand text-white hover:bg-brand rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
                       >
-                        Accept
+                        <CheckCircle size={18} className="block md:hidden" />
+                        <span className="hidden md:block"> Accept</span>
                       </button>
                       <button
                         onClick={() => handleUpdateStatus("declined")}
-                        className="px-8 py-3.5 bg-gray-100 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+                        className="px-4 py-3.5 bg-gray-100 text-gray-500 hover:bg-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
                       >
-                        Decline
+                        <XCircle size={18} className="block md:hidden" />
+                        <span className="hidden md:block"> Decline</span>
                       </button>
                     </div>
                   ) : (
-                    <button className="px-10 py-3.5 bg-gray-100 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-default border border-gray-100">
-                      Requested
+                    <button className="px-4 py-3.5 bg-gray-100 text-gray-400 hover:bg-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-default border border-gray-100">
+                      <Clock size={18} className="block md:hidden" />
+                      <span className="hidden md:block"> Requested</span>
                     </button>
                   )
                 ) : (
@@ -322,28 +395,19 @@ const Profile = () => {
 
             {/* Content Feed Section */}
             <div className="space-y-4">
-              <div className="flex item-center md:justify-start justify-between gap-4 px-2 z-40 ">
+              <div className="flex items-center md:justify-start justify-between gap-4 px-2 z-40">
                 {[
-                  {
-                    id: "overview",
-                    label: "Overview",
-                  },
-                  {
-                    id: "posts",
-                    label: "Posts",
-                  },
-                  {
-                    id: "comments",
-                    label: "Comments",
-                  },
+                  { id: "overview", label: "Overview" },
+                  { id: "posts", label: "Posts" },
+                  { id: "comments", label: "Comments" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center justify-center py-2 px-4 text-sm gap-2 rounded-full font-black  ${
+                    className={`flex items-center justify-center py-2 px-4 text-sm gap-2 rounded-full font-black ${
                       activeTab === tab.id
-                        ? "text-brand bg-black "
-                        : "text-black "
+                        ? "text-brand bg-black"
+                        : "text-black"
                     }`}
                   >
                     <span>{tab.label}</span>
@@ -358,7 +422,7 @@ const Profile = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="grid grid-cols-1 gap-4 "
+                    className="grid grid-cols-1 gap-4"
                   >
                     {posts.length > 0 ? (
                       posts.map((post) => (
@@ -369,7 +433,7 @@ const Profile = () => {
                             onLike={handleLikePost}
                             onDelete={handleDeletePost}
                             onComment={(id) => {
-                              setExpandedPostIds(prev => {
+                              setExpandedPostIds((prev) => {
                                 const next = new Set(prev);
                                 if (next.has(id)) next.delete(id);
                                 else next.add(id);
@@ -387,7 +451,10 @@ const Profile = () => {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                               >
-                                <CommentSection postId={post._id} communityName={post.communityIds?.[0]?.name} />
+                                <CommentSection
+                                  postId={post._id}
+                                  communityName={post.communityIds?.[0]?.name}
+                                />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -465,39 +532,38 @@ const Profile = () => {
                   </p>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div 
-                      onClick={() => setShowListModal('buddies')}
+                    <div
+                      onClick={() => setShowListModal("buddies")}
                       className="bg-gray-50/80 px-3 py-2 rounded-2xl border border-gray-100/50 cursor-pointer hover:bg-orange-50/50 transition-colors"
                     >
-                      <span className="block text-xl font-black text-gray-900 ">
+                      <span className="block text-xl font-black text-gray-900">
                         {buddyCount}
                       </span>
                       <span className="text-xs font-black">Buddies</span>
                     </div>
-                    <div 
-                      onClick={() => setShowListModal('expeditions')}
+                    <div
+                      onClick={() => setShowListModal("expeditions")}
                       className="bg-gray-50/80 px-3 py-2 rounded-2xl border border-gray-100/50 cursor-pointer hover:bg-orange-50/50 transition-colors"
                     >
-                      <span className="block text-xl font-black text-gray-900 ">
+                      <span className="block text-xl font-black text-gray-900">
                         {posts.length}
                       </span>
                       <span className="text-xs font-black">Movements</span>
                     </div>
                     {targetUser.hometown && (
                       <div className="bg-gray-50/80 px-3 py-2 rounded-2xl border border-gray-100/50">
-                        <span className="block text-xl font-black text-gray-900 ">
-                          <MapPin  className="mt-1"/>
+                        <span className="block text-xl font-black text-gray-900">
+                          <MapPin className="mt-1" />
                         </span>
                         <span className="text-xs font-black">
                           {targetUser.hometown}
                         </span>
                       </div>
                     )}
-                    <div 
-                      onClick={() => setShowListModal('communities')}
+                    <div
+                      onClick={() => setShowListModal("communities")}
                       className="bg-gray-50/80 px-3 py-2 rounded-2xl border border-gray-100/50 cursor-pointer hover:bg-orange-50/50 transition-colors"
                     >
-                      {/* mapping user join community icon  */}
                       <div className="flex flex-row items-center">
                         <div className="flex flex-row px-2">
                           {userCommunities?.slice(0, 3).map((community, index) => (
@@ -514,11 +580,10 @@ const Profile = () => {
                             </div>
                           )}
                         </div>
-                        <span className="block text-xl font-black text-gray-900 ">
+                        <span className="block text-xl font-black text-gray-900">
                           {userCommunities?.length}
                         </span>
                       </div>
-
                       <span className="text-xs font-black">Active in</span>
                     </div>
                   </div>
@@ -559,7 +624,7 @@ const Profile = () => {
       {/* Edit Profile Modal (Only Self) */}
       <AnimatePresence>
         {showEditModal && isOwnProfile && (
-          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -587,10 +652,7 @@ const Profile = () => {
                 </button>
               </div>
 
-              <form
-                onSubmit={handleUpdate}
-                className="space-y-4 h-auto"
-              >
+              <form onSubmit={handleUpdate} className="space-y-4 h-auto">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-black text-gray-900 tracking-widest px-2">
@@ -735,7 +797,7 @@ const Profile = () => {
       {/* List Modal (Buddies, Expeditions, Communities) */}
       <AnimatePresence>
         {showListModal && (
-          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -752,12 +814,15 @@ const Profile = () => {
               <div className="p-4 border-b border-gray-50 flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-display font-black text-gray-900 capitalize">
-                    {showListModal === 'communities' ? 'Active In' : showListModal}.
+                    {showListModal === "communities"
+                      ? "Active In"
+                      : showListModal}
+                    .
                   </h2>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                    {showListModal === 'buddies' && "Synchronized Network"}
-                    {showListModal === 'expeditions' && "Travel Chronicles"}
-                    {showListModal === 'communities' && "Joined Hubs"}
+                    {showListModal === "buddies" && "Synchronized Network"}
+                    {showListModal === "expeditions" && "Travel Chronicles"}
+                    {showListModal === "communities" && "Joined Hubs"}
                   </p>
                 </div>
                 <button
@@ -768,7 +833,7 @@ const Profile = () => {
                 </button>
               </div>
 
-              {showListModal === 'buddies' && (
+              {showListModal === "buddies" && (
                 <div className="p-4">
                   <div className="relative group">
                     <Search
@@ -788,71 +853,120 @@ const Profile = () => {
 
               <div className="flex-1 overflow-y-auto px-4 pb-8 custom-scrollbar">
                 <div className="space-y-3">
-                  {showListModal === 'buddies' && buddies.map((conn) => {
-                    const buddy = conn.senderId?._id === targetId ? conn.receiverId : conn.senderId;
-                    if (buddySearch && !buddy?.username?.toLowerCase().includes(buddySearch.toLowerCase()) && !buddy?.fullname?.toLowerCase().includes(buddySearch.toLowerCase())) return null;
-                    return (
-                      <Link
-                        key={conn._id}
-                        to={`/user/${buddy?._id}`}
-                        onClick={() => setShowListModal(null)}
-                        className="flex items-center gap-5 p-2 hover:bg-brand/5 rounded-3xl transition-all group border border-transparent hover:border-brand/10"
-                      >
-                        <div className="relative">
-                          <img src={buddy?.profileImage} className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md" alt={buddy?.username} />
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full shadow-sm" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-gray-900 truncate group-hover:text-brand transition-colors tracking-tight">{buddy?.username}</p>
-                          <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">{buddy?.fullname || "Traveler"}</p>
-                        </div>
-                        <ChevronRight size={18} className="text-gray-200 group-hover:text-brand group-hover:translate-x-1 transition-all" />
-                      </Link>
-                    );
-                  })}
+                  {showListModal === "buddies" &&
+                    buddies.map((conn) => {
+                      const buddy =
+                        conn.senderId?._id === targetId
+                          ? conn.receiverId
+                          : conn.senderId;
+                      if (
+                        buddySearch &&
+                        !buddy?.username
+                          ?.toLowerCase()
+                          .includes(buddySearch.toLowerCase()) &&
+                        !buddy?.fullname
+                          ?.toLowerCase()
+                          .includes(buddySearch.toLowerCase())
+                      )
+                        return null;
+                      return (
+                        <Link
+                          key={conn._id}
+                          to={`/user/${buddy?._id}`}
+                          onClick={() => setShowListModal(null)}
+                          className="flex items-center gap-5 p-2 hover:bg-brand/5 rounded-3xl transition-all group border border-transparent hover:border-brand/10"
+                        >
+                          <div className="relative">
+                            <img
+                              src={buddy?.profileImage}
+                              className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md"
+                              alt={buddy?.username}
+                            />
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full shadow-sm" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-black text-gray-900 truncate group-hover:text-brand transition-colors tracking-tight">
+                              {buddy?.username}
+                            </p>
+                            <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">
+                              {buddy?.fullname || "Traveler"}
+                            </p>
+                          </div>
+                          <ChevronRight
+                            size={18}
+                            className="text-gray-200 group-hover:text-brand group-hover:translate-x-1 transition-all"
+                          />
+                        </Link>
+                      );
+                    })}
 
-                  {showListModal === 'expeditions' && posts.map((post) => (
-                    <div key={post._id} className="p-4 bg-gray-50/50 rounded-3xl border border-gray-100 hover:border-brand/20 transition-all group">
-                      <div className="flex gap-4">
-                        {post.image && (
-                          <img src={post.image} className="w-20 h-20 rounded-2xl object-cover shadow-sm" alt="Post" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-gray-900 line-clamp-2 mb-2">{post.content}</p>
-                          <div className="flex items-center gap-2">
-                             <span className="text-[9px] font-black text-brand uppercase tracking-widest bg-brand/5 px-2 py-1 rounded-lg">
+                  {showListModal === "expeditions" &&
+                    posts.map((post) => (
+                      <div
+                        key={post._id}
+                        className="p-4 bg-gray-50/50 rounded-3xl border border-gray-100 hover:border-brand/20 transition-all group"
+                      >
+                        <div className="flex gap-4">
+                          {post.image && (
+                            <img
+                              src={post.image}
+                              className="w-20 h-20 rounded-2xl object-cover shadow-sm"
+                              alt="Post"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 line-clamp-2 mb-2">
+                              {post.content}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-black text-brand uppercase tracking-widest bg-brand/5 px-2 py-1 rounded-lg">
                                 {post.communityIds?.[0]?.name}
-                             </span>
-                             <span className="text-[9px] font-black text-gray-400 uppercase">
+                              </span>
+                              <span className="text-[9px] font-black text-gray-400 uppercase">
                                 {post.likes?.length || 0} Likes
-                             </span>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
 
-                  {showListModal === 'communities' && userCommunities.map((comm) => (
-                    <Link
-                      key={comm._id}
-                      to={`/community/${comm._id}`}
-                      onClick={() => setShowListModal(null)}
-                      className="flex items-center gap-5 p-2 hover:bg-brand/5 rounded-2xl transition-all group border border-transparent hover:border-brand/10"
-                    >
-                      <img src={comm.profileImage} className="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-md" alt={comm.name} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black text-gray-900 truncate group-hover:text-brand transition-colors tracking-tight">v/{comm.name}</p>
-                        <p className="text-[10px] text-gray-400 font-black tracking-widest mt-1 truncate">{comm.description}</p>
-                      </div>
-                      <ChevronRight size={18} className="text-gray-200 group-hover:text-brand group-hover:translate-x-1 transition-all" />
-                    </Link>
-                  ))}
+                  {showListModal === "communities" &&
+                    userCommunities.map((comm) => (
+                      <Link
+                        key={comm._id}
+                        to={`/community/${comm._id}`}
+                        onClick={() => setShowListModal(null)}
+                        className="flex items-center gap-5 p-2 hover:bg-brand/5 rounded-2xl transition-all group border border-transparent hover:border-brand/10"
+                      >
+                        <img
+                          src={comm.profileImage}
+                          className="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-md"
+                          alt={comm.name}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-black text-gray-900 truncate group-hover:text-brand transition-colors tracking-tight">
+                            v/{comm.name}
+                          </p>
+                          <p className="text-[10px] text-gray-400 font-black tracking-widest mt-1 truncate">
+                            {comm.description}
+                          </p>
+                        </div>
+                        <ChevronRight
+                          size={18}
+                          className="text-gray-200 group-hover:text-brand group-hover:translate-x-1 transition-all"
+                        />
+                      </Link>
+                    ))}
 
-                  {((showListModal === 'buddies' && buddies.length === 0) || 
-                    (showListModal === 'expeditions' && posts.length === 0) || 
-                    (showListModal === 'communities' && userCommunities.length === 0)) && (
+                  {((showListModal === "buddies" && buddies.length === 0) ||
+                    (showListModal === "expeditions" && posts.length === 0) ||
+                    (showListModal === "communities" &&
+                      userCommunities.length === 0)) && (
                     <div className="py-20 text-center">
-                      <p className="text-gray-400 font-black text-xs uppercase tracking-widest">No records found</p>
+                      <p className="text-gray-400 font-black text-xs uppercase tracking-widest">
+                        No records found
+                      </p>
                     </div>
                   )}
                 </div>

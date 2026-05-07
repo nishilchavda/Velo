@@ -1,17 +1,17 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../api";
-import { 
+import {
   TrendingUp,
-  Loader2, 
-  X, 
+  Loader2,
+  X,
   Image as ImageIcon,
   Edit,
   Trash,
   Settings,
   Users,
   ChevronRight,
-  Video
+  Video,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../Context/AuthContext";
@@ -43,7 +43,12 @@ const CommunityDetail = () => {
   // Community Management
   const [showEditCommunityModal, setShowEditCommunityModal] = useState(false);
   const [activeCommunityDropdown, setActiveCommunityDropdown] = useState(false);
-  const [communityForm, setCommunityForm] = useState({ name: "", description: "", profileImage: "", bannerImage: "" });
+  const [communityForm, setCommunityForm] = useState({
+    name: "",
+    description: "",
+    profileImage: "",
+    bannerImage: "",
+  });
   const [communityLoading, setCommunityLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -76,8 +81,8 @@ const CommunityDetail = () => {
     fetchData();
 
     const handleClickOutside = () => setActiveDropdownPostId(null);
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
   }, [fetchData]);
 
   const handleJoin = async () => {
@@ -109,12 +114,14 @@ const CommunityDetail = () => {
     }
   };
 
-
   const handleUpdateCommunity = async (e) => {
     e.preventDefault();
     try {
       setCommunityLoading(true);
-      const res = await api.put(`/community/update/${communityId}`, communityForm);
+      const res = await api.put(
+        `/community/update/${communityId}`,
+        communityForm,
+      );
       setCommunity(res.data.community);
       setShowEditCommunityModal(false);
       toast.success("Community updated successfully!");
@@ -126,7 +133,12 @@ const CommunityDetail = () => {
   };
 
   const handleDeleteCommunity = async () => {
-    if (!window.confirm("Are you sure? This will delete ALL posts and messages in this community permanently.")) return;
+    if (
+      !window.confirm(
+        "Are you sure? This will delete ALL posts and messages in this community permanently.",
+      )
+    )
+      return;
     try {
       await api.delete(`/community/delete/${communityId}`);
       toast.success("Community deleted permanently");
@@ -174,7 +186,7 @@ const CommunityDetail = () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     try {
       await api.delete(`/community/post/${postId}/delete`);
-      setPosts(posts.filter(p => p._id !== postId));
+      setPosts(posts.filter((p) => p._id !== postId));
       toast.success("Post deleted");
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to delete post");
@@ -188,9 +200,13 @@ const CommunityDetail = () => {
       const res = await api.put(`/community/post/${editingPost._id}/update`, {
         content: postContent,
         image: postImage,
-        video: postVideo
+        video: postVideo,
       });
-      setPosts(posts.map(p => p._id === editingPost._id ? { ...p, ...res.data.post } : p));
+      setPosts(
+        posts.map((p) =>
+          p._id === editingPost._id ? { ...p, ...res.data.post } : p,
+        ),
+      );
       setEditingPost(null);
       setIsCreatingPost(false);
       setPostContent("");
@@ -211,7 +227,11 @@ const CommunityDetail = () => {
     }
     try {
       const res = await api.post(`/community/post/${postId}/like`);
-      setPosts(posts.map(p => p._id === postId ? { ...p, likes: res.data.post.likes } : p));
+      setPosts(
+        posts.map((p) =>
+          p._id === postId ? { ...p, likes: res.data.post.likes } : p,
+        ),
+      );
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to like post");
     }
@@ -244,8 +264,8 @@ const CommunityDetail = () => {
             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
           </div>
 
-          <div className="px-8 pb-8 -mt-12 relative z-10 flex flex-col md:flex-row md:items-end gap-6">
-            <div className="w-32 h-32 rounded-4xl border-4 border-white overflow-hidden bg-white">
+          <div className="px-4 md:px-8 pb-4 md:pb-8 -mt-15 md:-mt-10 relative z-10 flex flex-col md:flex-row md:items-end gap-6">
+            <div className="w-30 h-30 rounded-full border-4 border-white overflow-hidden bg-white">
               <img
                 src={community?.profileImage}
                 className="w-full h-full object-cover"
@@ -253,8 +273,8 @@ const CommunityDetail = () => {
               />
             </div>
 
-            <div className="flex-1 pb-2">
-              <h1 className="text-4xl md:text-5xl font-display font-blacktext-gray-900 mb-2 drop-shadow-sm">
+            <div className="md:block flex-1 hidden pb-2 ">
+              <h1 className="text-2xl lowercase md:text-5xl font-display font-blacktext-gray-900 mb-2 drop-shadow-sm">
                 v/{community?.name}
               </h1>
 
@@ -264,7 +284,7 @@ const CommunityDetail = () => {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="md:flex hidden items-center gap-3">
               {!isMember ? (
                 <button
                   onClick={handleJoin}
@@ -307,12 +327,12 @@ const CommunityDetail = () => {
                               name: community.name,
                               description: community.description,
                               profileImage: community.profileImage,
-                              bannerImage: community.bannerImage
+                              bannerImage: community.bannerImage,
                             });
                             setShowEditCommunityModal(true);
                             setActiveCommunityDropdown(false);
                           }}
-                          className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black text-gray-700 hover:bg-gray-50 transition-all text-left uppercase tracking-widest"
+                          className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black text-gray-700 hover:bg-gray-50 transition-all text-left capitalize tracking-widest"
                         >
                           <Edit size={16} className="text-blue-500" />
                           Edit Community
@@ -322,7 +342,7 @@ const CommunityDetail = () => {
                             handleDeleteCommunity();
                             setActiveCommunityDropdown(false);
                           }}
-                          className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black text-red-600 hover:bg-red-50 transition-all text-left border-t border-gray-50 uppercase tracking-widest"
+                          className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black text-red-600 hover:bg-red-50 transition-all text-left border-t border-gray-50 capitalize tracking-widest"
                         >
                           <Trash size={16} />
                           Delete Community
@@ -333,6 +353,89 @@ const CommunityDetail = () => {
                 </div>
               )}
             </div>
+
+            <div className="md:hidden flex items-center justify-between">
+              <div className="flex-1 pb-2">
+                <h1 className="text-2xl lowercase md:text-5xl font-display font-blacktext-gray-900 mb-2 drop-shadow-sm">
+                  v/{community?.name}
+                </h1>
+
+                <div className="flex items-center gap-4 text-gray-400 font-bold text-sm">
+                  <span className="flex items-center gap-1.5">
+                    <Users size={16} /> {community?.members?.length} Members
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {!isMember ? (
+                  <button
+                    onClick={handleJoin}
+                    className="px-6 py-2 bg-black text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-brand transition-all shadow-lg shadow-black/10"
+                  >
+                    Join Community
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleLeave}
+                    className="px-6 py-2 bg-gray-100 text-gray-500 rounded-full text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all border border-gray-200"
+                  >
+                    Leave
+                  </button>
+                )}
+
+                {user && community?.creatorId?._id === user._id && (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveCommunityDropdown(!activeCommunityDropdown);
+                      }}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                    >
+                      <Settings size={20} />
+                    </button>
+
+                    <AnimatePresence>
+                      {activeCommunityDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                          className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 z-100 overflow-hidden"
+                        >
+                          <button
+                            onClick={() => {
+                              setCommunityForm({
+                                name: community.name,
+                                description: community.description,
+                                profileImage: community.profileImage,
+                                bannerImage: community.bannerImage,
+                              });
+                              setShowEditCommunityModal(true);
+                              setActiveCommunityDropdown(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black text-gray-700 hover:bg-gray-50 transition-all text-left capitalize tracking-widest"
+                          >
+                            <Edit size={16} className="text-blue-500" />
+                            Edit Community
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleDeleteCommunity();
+                              setActiveCommunityDropdown(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black text-red-600 hover:bg-red-50 transition-all text-left border-t border-gray-50 capitalize tracking-widest"
+                          >
+                            <Trash size={16} />
+                            Delete Community
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -340,7 +443,6 @@ const CommunityDetail = () => {
           {/* Center Content */}
           <div className="flex-1 space-y-8">
             <div className="space-y-8 max-w-3xl">
-
               {!isMember && !user && (
                 <div className="bg-orange-50 rounded-[2.5rem] p-8 text-center border border-orange-100 mb-8">
                   <p className="text-orange-900 font-bold mb-4">
@@ -390,7 +492,10 @@ const CommunityDetail = () => {
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                           >
-                            <CommentSection postId={post._id} communityName={post.communityIds?.[0]?.name} />
+                            <CommentSection
+                              postId={post._id}
+                              communityName={post.communityIds?.[0]?.name}
+                            />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -463,11 +568,11 @@ const CommunityDetail = () => {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-gray-900 truncate group-hover:text-brand transition-colors">
+                      <p className="text-sm font-black text-gray-900 lowercase group-hover:text-brand transition-colors">
                         v/{comm.name}
                       </p>
                       <p className="text-[10px] text-gray-400 font-bold tracking-widest">
-                        {comm.members?.length || 0} members
+                        {comm.members?.length || 0} Members
                       </p>
                     </div>
                     <ChevronRight
@@ -515,14 +620,22 @@ const CommunityDetail = () => {
                     <X size={24} className="text-gray-400" />
                   </button>
                 </div>
-                <form onSubmit={editingPost ? handleUpdatePost : handleCreatePost} className="space-y-8">
+                <form
+                  onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
+                  className="space-y-8"
+                >
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
                       Post Community
                     </label>
                     <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-2xl border-2 border-brand w-fit">
-                      <img src={community?.profileImage} className="w-6 h-6 rounded-lg object-cover" />
-                      <span className="text-xs font-black">v/{community?.name}</span>
+                      <img
+                        src={community?.profileImage}
+                        className="w-6 h-6 rounded-lg object-cover"
+                      />
+                      <span className="text-xs lowercase font-black">
+                        v/{community?.name}
+                      </span>
                     </div>
                   </div>
 
@@ -545,7 +658,10 @@ const CommunityDetail = () => {
                     </label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">
-                        <ImageIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <ImageIcon
+                          className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400"
+                          size={18}
+                        />
                         <input
                           type="url"
                           placeholder="Image URL..."
@@ -555,7 +671,10 @@ const CommunityDetail = () => {
                         />
                       </div>
                       <div className="relative">
-                        <Video className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <Video
+                          className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400"
+                          size={18}
+                        />
                         <input
                           type="url"
                           placeholder="Video URL..."
@@ -574,8 +693,10 @@ const CommunityDetail = () => {
                   >
                     {creatingPostLoading ? (
                       <Loader2 className="animate-spin" size={20} />
+                    ) : editingPost ? (
+                      "Update Post"
                     ) : (
-                      editingPost ? "Update Post" : "Broadcast Post"
+                      "Upload Post"
                     )}
                   </button>
                 </form>
@@ -616,41 +737,69 @@ const CommunityDetail = () => {
                 <form onSubmit={handleUpdateCommunity} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">Community Name</label>
-                      <input 
-                        type="text" 
-                        value={communityForm.name} 
-                        onChange={(e) => setCommunityForm({...communityForm, name: e.target.value})}
-                        className="w-full bg-gray-50 rounded-xl px-6 py-4 font-bold text-gray-900 border-2 border-transparent focus:border-brand outline-none transition-all"
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">
+                        Community Name
+                      </label>
+                      <input
+                        type="text"
+                        value={communityForm.name}
+                        onChange={(e) =>
+                          setCommunityForm({
+                            ...communityForm,
+                            name: e.target.value,
+                          })
+                        }
+                        className="w-full lowercase bg-gray-50 rounded-xl px-6 py-4 font-bold text-gray-900 border-2 border-transparent focus:border-brand outline-none transition-all"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">Avatar URL</label>
-                      <input 
-                        type="url" 
-                        value={communityForm.profileImage} 
-                        onChange={(e) => setCommunityForm({...communityForm, profileImage: e.target.value})}
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">
+                        Avatar URL
+                      </label>
+                      <input
+                        type="url"
+                        value={communityForm.profileImage}
+                        onChange={(e) =>
+                          setCommunityForm({
+                            ...communityForm,
+                            profileImage: e.target.value,
+                          })
+                        }
                         className="w-full bg-gray-50 rounded-xl px-6 py-4 font-bold text-gray-900 border-2 border-transparent focus:border-brand outline-none transition-all"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">Banner Image URL</label>
-                    <input 
-                      type="url" 
-                      value={communityForm.bannerImage} 
-                      onChange={(e) => setCommunityForm({...communityForm, bannerImage: e.target.value})}
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">
+                      Banner Image URL
+                    </label>
+                    <input
+                      type="url"
+                      value={communityForm.bannerImage}
+                      onChange={(e) =>
+                        setCommunityForm({
+                          ...communityForm,
+                          bannerImage: e.target.value,
+                        })
+                      }
                       className="w-full bg-gray-50 rounded-xl px-6 py-4 font-bold text-gray-900 border-2 border-transparent focus:border-brand outline-none transition-all"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">About the Community</label>
-                    <textarea 
-                      value={communityForm.description} 
-                      onChange={(e) => setCommunityForm({...communityForm, description: e.target.value})}
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">
+                      About the Community
+                    </label>
+                    <textarea
+                      value={communityForm.description}
+                      onChange={(e) =>
+                        setCommunityForm({
+                          ...communityForm,
+                          description: e.target.value,
+                        })
+                      }
                       className="w-full bg-gray-50 rounded-xl px-6 py-4 font-bold text-gray-900 border-2 border-transparent focus:border-brand outline-none transition-all h-32 resize-none"
                     />
                   </div>
@@ -660,7 +809,11 @@ const CommunityDetail = () => {
                     disabled={communityLoading}
                     className="w-full py-5 bg-black text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-brand transition-all shadow-xl shadow-black/10 disabled:opacity-50"
                   >
-                    {communityLoading ? <Loader2 className="animate-spin mx-auto" size={20} /> : "Save Changes"}
+                    {communityLoading ? (
+                      <Loader2 className="animate-spin mx-auto" size={20} />
+                    ) : (
+                      "Save Changes"
+                    )}
                   </button>
                 </form>
               </motion.div>

@@ -121,7 +121,7 @@ const LoginSignup = () => {
                       className="bg-gray-50/50 border border-gray-100 pl-14 pr-6 py-4 rounded-2xl w-full outline-none focus:bg-white focus:border-brand focus:ring-4 focus:ring-brand/5 transition-all font-bold text-gray-900 placeholder:text-gray-400"
                       type="text"
                       name="username"
-                      placeholder="Full Name"
+                      placeholder="Username"
                       value={signupData.username}
                       onChange={handleSignupChange}
                       required

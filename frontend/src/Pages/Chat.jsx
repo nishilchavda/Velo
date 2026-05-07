@@ -301,14 +301,14 @@ const Chat = ({ setHideMobileNav }) => {
             {selectedChat ? (
                 <>
                     {/* Chat Header */}
-                    <div className="p-6  md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between bg-white z-10 shadow-sm shadow-gray-50">
+                    <div className="p-4 md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between bg-white z-10 shadow-sm shadow-gray-50">
                         <div className="flex items-center gap-4">
                             <button onClick={() => setSelectedChat(null)} className="md:hidden p-2 -ml-2 text-gray-400 hover:text-gray-900">
                                 <ChevronLeft size={24} />
                             </button>
                             <div className="relative">
                                 <img 
-                                    src={selectedChat.profileImage || `https://i.pravatar.cc/100?u=${selectedChat._id}`} 
+                                    src={selectedChat.profileImage} 
                                     className="w-12 h-12 rounded-2xl object-cover shadow-sm border-2 border-white"
                                     alt="chat target"
                                 />
@@ -341,7 +341,7 @@ const Chat = ({ setHideMobileNav }) => {
                     </div>
 
                     {/* Messages Body */}
-                    <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-orange-50/20">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-orange-50/20">
                         <AnimatePresence>
                             {messages.map((msg, i) => {
                                 const sender = msg.senderId?._id || msg.senderId;

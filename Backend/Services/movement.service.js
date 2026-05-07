@@ -126,7 +126,7 @@ module.exports.getMovement = async ({ movementId }) => {
 // get all movements
 module.exports.getAllMovements = async ({userId}) => {
   try {
-    const mov = await movement.find({userId: userId});
+    const mov = await movement.find({userId: userId}).populate("userId", "username fullname email profileImage bio tags");
     return mov || [];
   } catch (error) {
     throw error;
@@ -140,7 +140,7 @@ module.exports.getGlobalMovements = async ({ userId }) => {
     const movs = await movement.find({ 
       userId: { $ne: userId },
       status: "active" 
-    }).populate("userId", "username email profileImage bio tags");
+    }).populate("userId", "username fullname email profileImage bio tags");
     
     return movs || [];
   } catch (error) {
@@ -162,7 +162,7 @@ module.exports.getMatchFeed = async (movementId, userId) => {
       startDate: { $lte: userTrip.endDate }, 
       endDate: { $gte: userTrip.startDate }
     })
-    .populate("userId", "username email profileImage tags vibeTags bio") 
+    .populate("userId", "username fullname email profileImage tags vibeTags bio") 
     .lean(); 
 
     const scoredMatches = potentialMatches.map(match => {

@@ -1,7 +1,7 @@
 import MovementCard from "./MovementCard";
 import { motion } from "framer-motion";
 
-const MovementsFeed = ({ movements = [], loading = false, onEdit, onJoin, requestingId }) => {
+const MovementsFeed = ({ movements = [], loading = false, onEdit, onDelete, onJoin, requestingId }) => {
   if (loading) {
     return (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 py-12">
@@ -40,6 +40,7 @@ const MovementsFeed = ({ movements = [], loading = false, onEdit, onJoin, reques
           <MovementCard 
             movement={movement} 
             onEdit={onEdit} 
+            onDelete={onDelete}
             onJoin={onJoin}
             requestingId={requestingId}
           />

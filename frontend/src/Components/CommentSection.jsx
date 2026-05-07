@@ -92,11 +92,11 @@ const CommentSection = ({ postId }) => {
   const commentTree = buildCommentTree(comments);
 
   const CommentItem = ({ comment, depth = 0 }) => (
-    <div className={`space-y-4 ${depth > 0 ? 'ml-6 mt-3 border-l border-gray-100 pl-4' : 'mb-6'}`}>
+    <div className={`space-y-4 ${depth > 0 ? 'ml-6 mt-3 rounded-xl border-l border-gray-100 pl-4' : 'mb-6'}`}>
       <div className="flex gap-3">
         <img 
           src={comment.userId?.profileImage} 
-          className="w-7 h-7 rounded-lg object-cover"
+          className="w-7 h-7 rounded-full object-cover"
           alt="user"
         />
         <div className="flex-1 min-w-0">
@@ -154,7 +154,7 @@ const CommentSection = ({ postId }) => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-gray-50/30 border-t border-gray-100">
+      <div className="p-4 bg-gray-50/30 rounded-b-xl border-t border-gray-100">
         <AnimatePresence>
           {replyTo && (
             <motion.div 

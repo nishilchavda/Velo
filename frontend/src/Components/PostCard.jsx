@@ -40,7 +40,7 @@ const PostCard = ({
   }, [activeDropdownPostId, post._id, setActiveDropdownPostId]);
 
   return (
-    <div className="hover:bg-orange-50/30 rounded-2xl transition-all duration-300 p-4 group relative">
+    <div className="hover:bg-orange-50/30 rounded-2xl transition-all duration-300 md:p-4 p-2 group relative">
       <div className="p-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link to={`/user/${post.userId?._id || post.userId}`}>
@@ -56,15 +56,23 @@ const PostCard = ({
                 <div key={comm._id} className="flex items-center gap-1">
                   <Link
                     to={`/community/${comm._id}`}
-                    className="text-[10px] font-black text-gray-900 hover:text-brand transition-colors tracking-wider"
+                    className="text-[10px] lowercase font-black text-gray-900 hover:text-brand transition-colors tracking-wider"
                   >
                     v/{comm.name}
                   </Link>
                   {i < post.communityIds.length - 1 && <span className="text-gray-800 text-xs">&</span>}
                 </div>
               )) || (
-                <p className="text-[10px] font-black text-gray-900 tracking-wider">v/expedition</p>
+                <p className="text-[10px] font-black text-gray-900 tracking-wider">v/communities</p>
               )}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* adding username */}
+              <Link to={`/user/${post.userId?._id || post.userId}`}>
+                <p className="text-[8px] font-black text-gray-900 lowercase tracking-wider">
+                 by @{post.userId?.username}
+                </p>
+              </Link>
             </div>
             <p className="text-[9px] text-gray-400 font-bold uppercase">
               {formatRelativeTime(post.createdAt)}
@@ -115,7 +123,7 @@ const PostCard = ({
       </div>
 
       <div className="flex-1 mt-2">
-        <p className="font-semibold leading-relaxed line-clamp-3 mb-4 px-2 text-gray-800">
+        <p className="font-semibold leading-relaxed  line-clamp-3 mb-4 px-2 text-gray-800">
           {post.content}
         </p>
         {post.image && (
