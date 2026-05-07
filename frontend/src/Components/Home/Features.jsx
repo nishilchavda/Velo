@@ -2,8 +2,8 @@ import { Users, Route, MessageSquare, Shield, Globe, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SpotlightCard from "../UI/SpotlightCard";
-import TrueFocus from "../UI/TrueFocus";
+import SpotlightCard from "../ui/SpotlightCard";
+import TrueFocus from "../ui/TrueFocus";
 
 gsap.registerPlugin(ScrollTrigger);
 

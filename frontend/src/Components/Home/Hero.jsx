@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ArrowRight } from "lucide-react";
-import MasonryGrid from "../UI/MasonryGrid";
+import MasonryGrid from "../ui/MasonryGrid";
 import { AuthContext } from "../../Context/AuthContext";
 import { Link } from "react-router-dom";
 import { useContext } from "react";

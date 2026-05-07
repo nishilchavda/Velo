@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { UserPlus, Search, PlaneTakeoff, ArrowRight } from "lucide-react";
-import TiltedCard from "../UI/TiltedCard";
+import TiltedCard from "../ui/TiltedCard";
 
 const HowItWorks = () => {
   const steps = [

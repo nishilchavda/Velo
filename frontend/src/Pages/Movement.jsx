@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
-import MovementsFeed from "../Components/UI/MovementsFeed";
-import CreateMovementModal from "../Components/UI/CreateMovementModal";
+import MovementsFeed from "../Components/ui/MovementsFeed";
+import CreateMovementModal from "../Components/ui/CreateMovementModal";
+
 import { Plus, Search, Filter, Compass, Route } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../Context/AuthContext";
