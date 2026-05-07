@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+  import { useState, useEffect, useMemo } from 'react';
 import api from '../api'; 
 import { AuthContext } from './AuthContext';
 
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await api.post('/user/register', { username, email, password, role: 'user' });
+      const response = await api.post('/user/signup', { username, email, password, role: 'user' });
       const { token, user: newUser } = response.data;
       
       setUser(newUser);
