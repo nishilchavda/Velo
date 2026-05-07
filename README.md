@@ -1,8 +1,8 @@
-# Velo | Find your crew. Share the journey. 🌍
+# Velo - Find your crew. Share the journey. 🌍
 
 Velo is a premium travel social platform designed for solo explorers and group travelers to find companions, join "Movements" (trips), and stay connected through real-time chat.
 
-![Velo Logo](frontend/public/logo.png) <!-- Replace with actual path if different -->
+![Velo Homepage](frontend/public/Homepage.png)
 
 ## 🚀 Project Overview
 
