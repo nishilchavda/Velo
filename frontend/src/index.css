@@ -1,0 +1,61 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --color-brand: #ea580c; /* Vibrant Orange 600 */
+  --color-brand-dark: #9a3412;
+  --color-brand-light: #fff7ed;
+  --color-accent: #f59e0b; /* Warm Amber 500 */
+  --color-secondary: #262626; /* Warm Charcoal */
+  --color-warm: #fff7ed;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-display: "Bricolage Grotesque", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-orange-50/30 text-stone-900 antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-extrabold tracking-tight text-stone-900;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-gray-100;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-r from-stone-900 via-orange-700 to-amber-500;
+  }
+
+  .btn-primary {
+    @apply px-7 py-3.5 bg-brand text-white hover:bg-gray-800 transition-all duration-300 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply px-7 py-3.5 bg-white text-gray-900 border border-gray-200 hover:border-gray-900 transition-all duration-300 rounded-xl font-bold flex items-center gap-2 hover:-translate-y-0.5 active:translate-y-0 shadow-sm;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 4s ease-in-out infinite;
+}
