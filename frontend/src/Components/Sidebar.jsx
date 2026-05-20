@@ -45,7 +45,8 @@ const Sidebar = ({ isExpanded, setIsExpanded, hideMobileNav }) => {
     };
     fetchUnreadCount();
 
-    const socket = io("http://localhost:3001");
+    const socketURL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const socket = io(socketURL);
     socket.emit("join_user", user._id);
 
     socket.on("new_notification", (notif) => {
