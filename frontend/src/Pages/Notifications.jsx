@@ -46,7 +46,7 @@ const Notifications = () => {
     }
     fetchNotifications();
 
-    const socket = io("http://localhost:3001");
+    const socket = io("https://velo-movements.vercel.app");
     socket.emit("join_user", user._id);
 
     socket.on("new_notification", (notif) => {
